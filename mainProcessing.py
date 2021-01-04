@@ -1,3 +1,7 @@
+# from ../DSB2017.layers import nms,iou
+import sys
+sys.path.append("../DSB2017")
+from layers import nms, iou
 import cv2
 import os
 import sys
@@ -15,13 +19,10 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QMainWindow, QApplica
 
 from demoUI import Ui_Form
 
-# from ../DSB2017.layers import nms,iou
-import sys
-sys.path.append("../DSB2017")
-from layers import nms, iou
 
 app = QtWidgets.QApplication(sys.argv)
 qtWidget = QtWidgets.QWidget()
+
 
 class appMainWindow(Ui_Form):
 
@@ -33,28 +34,45 @@ class appMainWindow(Ui_Form):
         self.browseButton.clicked.connect(self.Browser_directory)
         self.imageIndex.currentIndexChanged.connect(self.onCurrentIndexChanged)
         self.originalSlider.valueChanged.connect(self.choose_slice)
+        self.originalIndexEdit.textChanged.connect(self.Index_change)
+        self.input_dir = ""
+
+    def Index_change(self, text):
+        try:
+            value = int(text)
+        except:
+            print("invalid index", text)
 
     def Browser_directory(self):
+        self.input_dir = ""
         print("------Open Browser-------")
         dialog_style = QFileDialog.DontUseNativeDialog
         dialog_style |= QFileDialog.DontUseCustomDirectoryIcons
-        self.input_dir = QFileDialog.getExistingDirectory(None, 'Select a folder:',  "../Image",)
+        self.input_dir = QFileDialog.getExistingDirectory(
+            None, 'Select a folder:',  "../Image",)
         self.directoryBrowser.setText(self.input_dir)
-        
-        self.Path_Image = ("/").join(self.input_dir.split("/")[0:-1])
-        self.List_Path_Image = [f for f in os.listdir(self.Path_Image)]
+        if self.input_dir == '':
+            print("not select file yet")
+        else:
+            self.Path_Image = ("/").join(self.input_dir.split("/")[0:-1])
+            self.List_Path_Image = [f for f in os.listdir(self.Path_Image)]
 
-        self.List_Image = [f for f in os.listdir(self.input_dir) if f.endswith('.npy')]
-        self.List_Image.sort(reverse=True)
-        
-        self.imageIndex.addItems(self.List_Image)
-        self.Path_Original = self.input_dir + "/" + str(self.imageIndex.currentText())
-        self.Path_Preprocessing = self.Path_Image + "/" + self.List_Path_Image[1]
-        self.Path_Detection = self.Path_Image + "/" + self.List_Path_Image[0]
-        print(self.List_Path_Image)
+            self.List_Image = [f for f in os.listdir(
+                self.input_dir) if f.endswith('.npy')]
+            self.List_Image.sort(reverse=True)
+
+            self.imageIndex.addItems(self.List_Image)
+            self.Path_Original = self.input_dir + \
+                "/" + str(self.imageIndex.currentText())
+            self.Path_Preprocessing = self.Path_Image + \
+                "/" + self.List_Path_Image[1]
+            self.Path_Detection = self.Path_Image + \
+                "/" + self.List_Path_Image[0]
+            print(self.List_Path_Image)
 
     def onCurrentIndexChanged(self, indeximg):
-        self.Path_img = self.input_dir + "/" + str(self.imageIndex.currentText())
+        self.Path_img = self.input_dir + "/" + \
+            str(self.imageIndex.currentText())
 
         self.Load_numpy_img = np.load(self.Path_img, allow_pickle=True)
 
@@ -91,34 +109,37 @@ class appMainWindow(Ui_Form):
 
     def Detection_Training(self):
         from shutil import copyfile
-        self.Path_preprocessing1 = self.input_dir.split("/")[0:-1]
-        self.Path_preprocessing_img = (
-            "/").join(self.Path_preprocessing1) + "/2Preprocessing_img/"
-        self.Path_preprocessing_label = (
-            "/").join(self.Path_preprocessing1) + "/2Preprocessing_label/"
-        self.Path_preprocessing_Detect = (
-            "/").join(self.Path_preprocessing1) + "/3Detection_img/"
-        self.Path_preprocessing_image = (
-            "/").join(self.Path_preprocessing1) + "/preprocess_result/"
-        self.Path_pp = self.Path_img.replace(
-            'original', 'preprocess_result').replace('_origin', 'pp_clean')
-        # Lisst_del = [f for in os.listdir(self.Path_Preprocessing)]
-        for i in os.listdir(self.Path_preprocessing_img):
-            os.remove(self.Path_preprocessing_img + i)
-        for i in os.listdir(self.Path_preprocessing_label):
-            os.remove(self.Path_preprocessing_label + i)
-        for i in os.listdir(self.Path_preprocessing_Detect):
-            os.remove(self.Path_preprocessing_Detect + i)
-        # print(self.Path_pp)
-        copyfile(self.Path_pp, self.Path_preprocessing_img +
-                 os.path.basename(self.Path_pp).replace("pp_clean", "_clean"))
-        copyfile(self.Path_pp.replace("pp_clean", "_label"), self.Path_preprocessing_img.replace(
-            '_img', '_label') + os.path.basename(self.Path_pp.replace("pp_clean", "_label")))
+        if len(self.input_dir) == 0:
+            print("Choose source folder first!")
+        else:
+            self.Path_preprocessing1 = self.input_dir.split("/")[0:-1]
+            self.Path_preprocessing_img = (
+                "/").join(self.Path_preprocessing1) + "/2Preprocessing_img/"
+            self.Path_preprocessing_label = (
+                "/").join(self.Path_preprocessing1) + "/2Preprocessing_label/"
+            self.Path_preprocessing_Detect = (
+                "/").join(self.Path_preprocessing1) + "/3Detection_img/"
+            self.Path_preprocessing_image = (
+                "/").join(self.Path_preprocessing1) + "/preprocess_result/"
+            self.Path_pp = self.Path_img.replace(
+                'original', 'preprocess_result').replace('_origin', 'pp_clean')
+            # Lisst_del = [f for in os.listdir(self.Path_Preprocessing)]
+            for i in os.listdir(self.Path_preprocessing_img):
+                os.remove(self.Path_preprocessing_img + i)
+            for i in os.listdir(self.Path_preprocessing_label):
+                os.remove(self.Path_preprocessing_label + i)
+            for i in os.listdir(self.Path_preprocessing_Detect):
+                os.remove(self.Path_preprocessing_Detect + i)
+            # print(self.Path_pp)
+            copyfile(self.Path_pp, self.Path_preprocessing_img +
+                     os.path.basename(self.Path_pp).replace("pp_clean", "_clean"))
+            copyfile(self.Path_pp.replace("pp_clean", "_label"), self.Path_preprocessing_img.replace(
+                '_img', '_label') + os.path.basename(self.Path_pp.replace("pp_clean", "_label")))
 
-        sys.path.append("../DSB2017")
-        from main import main_init
-        main_init()
-        appMainWindow.Detection_Image(self)
+            sys.path.append("../DSB2017")
+            from main import main_init
+            main_init()
+            appMainWindow.Detection_Image(self)
 
     def Detection_Image(self):
         Path_Detection_img = self.Path_preprocessing_img.replace(
@@ -152,22 +173,25 @@ class appMainWindow(Ui_Form):
         self.detectionResultImage.show()
 
     def choose_slice(self):
-
         # [Phu] valueChanged.connect(self.changeValue)
-        self.originalSlider.valueChanged.connect(self.changeValue)
-        self.Path_img = self.input_dir + "/" + str(self.imageIndex.currentText())
-        self.Path_pp = self.Path_img.replace(
-            'original', 'preprocess_result').replace('_origin', 'pp_clean')
-        [self.spacing_pre, self.img_pre] = np.load(
-            self.Path_pp, allow_pickle=True)
-        self.originalSlider.setMinimum(0)
-        self.originalSlider.setMaximum(self.img_pre.shape[1] - 1)
+        if self.input_dir == "":
+            print("select dataset first !!")
+        else:
+            self.originalSlider.valueChanged.connect(self.changeValue)
+            self.Path_img = self.input_dir + "/" + \
+                str(self.imageIndex.currentText())
+            self.Path_pp = self.Path_img.replace(
+                'original', 'preprocess_result').replace('_origin', 'pp_clean')
+            [self.spacing_pre, self.img_pre] = np.load(
+                self.Path_pp, allow_pickle=True)
+            self.originalSlider.setMinimum(0)
+            self.originalSlider.setMaximum(self.img_pre.shape[1] - 1)
 
-        #self.input_dir = QFileDialog.getExistingDirectory(None, 'Select a folder:',  "../Image",)
+            #self.input_dir = QFileDialog.getExistingDirectory(None, 'Select a folder:',  "../Image",)
 
-        self.Load_numpy_img = np.load(self.Path_img)
+            self.Load_numpy_img = np.load(self.Path_img)
 
-        # self.setWindowTitle("SpinBox demo")
+            # self.setWindowTitle("SpinBox demo")
 
     def changeValue(self):
 
@@ -253,6 +277,7 @@ def Main_Function():
     ui = appMainWindow()
     qtWidget.show()
     sys.exit(app.exec_())
+
 
 if __name__ == "__main__":
     Main_Function()

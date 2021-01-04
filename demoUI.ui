@@ -354,7 +354,7 @@ Using 3-D Deep Leaky Noisy-OR Network
     </font>
    </property>
    <property name="text">
-    <string>Fangzhou Liao, Ming Liang, Zhe Li, Xiaolin Hu, Sen Song</string>
+    <string>陳柏廷, 楊承翰, 鄭惟, 王傑士, 謝宜紘, 許龍君</string>
    </property>
   </widget>
   <widget class="QLabel" name="detectResultLabel_2">

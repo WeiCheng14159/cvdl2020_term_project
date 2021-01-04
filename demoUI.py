@@ -52,7 +52,8 @@ class Ui_Form(object):
         self.preprocessingImage.setWordWrap(False)
         self.preprocessingImage.setObjectName("preprocessingImage")
         self.detectionResultImage = QtWidgets.QLabel(Form)
-        self.detectionResultImage.setGeometry(QtCore.QRect(1060, 140, 500, 400))
+        self.detectionResultImage.setGeometry(
+            QtCore.QRect(1060, 140, 500, 400))
         self.detectionResultImage.setFrameShape(QtWidgets.QFrame.Box)
         self.detectionResultImage.setLineWidth(1)
         self.detectionResultImage.setText("")
@@ -160,13 +161,15 @@ class Ui_Form(object):
         self.detectButton.setText(_translate("Form", "Detect"))
         self.browseButton.setText(_translate("Form", "Browse Dataset"))
         self.titleLabel.setText(_translate("Form", "Evaluate The Malignancy Of Pulmonary Nodules \n"
-"Using 3-D Deep Leaky Noisy-OR Network \n"
-" "))
+                                           "Using 3-D Deep Leaky Noisy-OR Network \n"
+                                           " "))
         self.originalImageLabel.setText(_translate("Form", "Original Image"))
-        self.preprocessingLabel.setText(_translate("Form", "Preprocessing Image"))
+        self.preprocessingLabel.setText(
+            _translate("Form", "Preprocessing Image"))
         self.detectImageLabel.setText(_translate("Form", "Detect Image"))
         self.orignalSliderLabel.setText(_translate("Form", "Original Slice"))
         self.chooseImageLabel.setText(_translate("Form", "Choose Image"))
         self.detectResultLabel.setText(_translate("Form", "Detect Result"))
-        self.Author.setText(_translate("Form", "Fangzhou Liao, Ming Liang, Zhe Li, Xiaolin Hu, Sen Song"))
+        self.Author.setText(_translate(
+            "Form", "Fangzhou Liao, Ming Liang, Zhe Li, Xiaolin Hu, Sen Song"))
         self.detectResultLabel_2.setText(_translate("Form", "Detect Result"))

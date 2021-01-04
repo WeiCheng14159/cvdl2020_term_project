@@ -1,3 +1,8 @@
+# from ../DSB2017.layers import nms,iou
+import sys                     # nopep8
+sys.path.append("../DSB2017")  # nopep8
+from layers import nms, iou    # nopep8
+
 import cv2
 import os
 import sys
@@ -15,112 +20,131 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QMainWindow, QApplica
 
 from demoUI import Ui_Form
 
-# from ../DSB2017.layers import nms,iou
-import sys
-sys.path.append("../DSB2017")
-from layers import nms, iou
-
 app = QtWidgets.QApplication(sys.argv)
 qtWidget = QtWidgets.QWidget()
+
 
 class appMainWindow(Ui_Form):
 
     def __init__(self):
+
+        self.inputDir = ""
+        self.slideBarVal = 0
+
         super(appMainWindow, self).__init__()
         self.setupUi(qtWidget)
-        # self.preprocessButton.clicked.connect(QCoreApplication.instance().quit)
-        self.detectButton.clicked.connect(self.Detection_Training)
-        self.browseButton.clicked.connect(self.Browser_directory)
-        self.imageIndex.currentIndexChanged.connect(self.onCurrentIndexChanged)
-        self.originalSlider.valueChanged.connect(self.choose_slice)
 
-    def Browser_directory(self):
+        # Called when detection button is clicked
+        self.detectButton.clicked.connect(self.__detectionTraining)
+
+        # Called when browse directory button is clicked
+        self.browseButton.clicked.connect(self.__browserDirectory)
+
+        # Called when user chooses diff images in a data set
+        self.imageIndex.currentIndexChanged.connect(self.__datasetIndexChanged)
+        self.imageIndex.currentIndexChanged.connect(self.__updateView)
+
+        # Called when slide bar moves
+        self.originalSlider.valueChanged.connect(self.__slideBarValueChange)
+        self.originalSlider.valueChanged.connect(self.__updateView)
+
+        # Called when user types an index
+        self.originalIndexEdit.textChanged.connect(self.__sliceChange)
+        self.originalIndexEdit.textChanged.connect(self.__updateView)
+
+    def __browserDirectory(self):
+
         print("------Open Browser-------")
         dialog_style = QFileDialog.DontUseNativeDialog
         dialog_style |= QFileDialog.DontUseCustomDirectoryIcons
-        self.input_dir = QFileDialog.getExistingDirectory(None, 'Select a folder:',  "../Image",)
-        self.directoryBrowser.setText(self.input_dir)
-        
-        self.Path_Image = ("/").join(self.input_dir.split("/")[0:-1])
-        self.List_Path_Image = [f for f in os.listdir(self.Path_Image)]
 
-        self.List_Image = [f for f in os.listdir(self.input_dir) if f.endswith('.npy')]
-        self.List_Image.sort(reverse=True)
-        
-        self.imageIndex.addItems(self.List_Image)
-        self.Path_Original = self.input_dir + "/" + str(self.imageIndex.currentText())
-        self.Path_Preprocessing = self.Path_Image + "/" + self.List_Path_Image[1]
-        self.Path_Detection = self.Path_Image + "/" + self.List_Path_Image[0]
-        print(self.List_Path_Image)
+        # Choose dataset directory
+        self.inputDir = QFileDialog.getExistingDirectory(
+            None, 'Select a folder:',  "../Image",)
+        self.directoryBrowser.setText(self.inputDir)
 
-    def onCurrentIndexChanged(self, indeximg):
-        self.Path_img = self.input_dir + "/" + str(self.imageIndex.currentText())
+        if self.inputDir == '':
+            print("not select file yet")
+        else:
+            # Set dataset directory
+            self.datasetPath = ("/").join(self.inputDir.split("/")[0:-1])
+            self.listDatasetPath = [f for f in os.listdir(self.datasetPath)]
 
-        self.Load_numpy_img = np.load(self.Path_img, allow_pickle=True)
+            # Get list of images (in *.npy form)
+            self.listOfImages = [f for f in os.listdir(
+                self.inputDir) if f.endswith('.npy')]
+            self.listOfImages.sort(reverse=True)
 
-        cv2.imwrite(self.Path_img.replace(".npy", ".jpg"),
-                    self.Load_numpy_img[0, 0])
-        img = QPixmap(self.Path_img.replace(".npy", ".jpg"))
+            # Clear before adding items to drop list
+            self.imageIndex.clear()
+            self.imageIndex.addItems(self.listOfImages)
+
+    def __update_path(self):
+
+        path2Img = self.inputDir + "/" + str(self.imageIndex.currentText())
+        path2preImg = path2Img.replace('original', 'preprocess_result').replace(
+            '_origin', 'pp_clean')
+        return (path2Img, path2preImg)
+
+    def __sliceChange(self, text):
+
+        try:
+            self.slideBarVal = int(text)
+        except:
+            print("Invalid index: ", text)
+
+    def __datasetIndexChanged(self, indeximg):
+
+        # Update image path
+        self.__update_path()
+
+        # Reset to num 0 slice
         self.originalSlider.setValue(0)
-        self.originalImage.setPixmap(img)
-        self.originalImage.show()
 
+    def __slideBarValueChange(self):
 
-##############################################################################
+        # Update slide bar value
+        self.slideBarVal = self.originalSlider.value()
 
-    def Show_Preprocessing(self):
-        """"""
-        self.Path_preprocessing = self.input_dir.split("/")[0:-1]
-        self.Path_preprocessing = (
-            "/").join(self.Path_preprocessing) + "2_Preprocessing_img"
-        # print(self.Path_preprocessing)
-        """"""
+        # Update the slice value in text field
+        self.originalIndexEdit.setText(str(self.slideBarVal))
 
-        Path_Preprocessing_img = self.Path_Preprocessing + \
-            "/" + str(self.imageIndex.currentText())
-        # print(self.Path_Preprocessing)
-        self.Load_numpy_img = np.load(Path_Preprocessing_img)
+    def __detectionTraining(self):
 
-        cv2.imwrite(Path_Preprocessing_img.replace(
-            ".npy", ".jpg"), self.Load_numpy_img[0, 0])
-        img = QPixmap(Path_Preprocessing_img.replace(".npy", ".jpg"))
-
-        self.preprocessingImage.setPixmap(img)
-        # self.preprocessingImage.setGeometry(540, 120, 500, 400)
-        self.preprocessingImage.show()
-
-    def Detection_Training(self):
         from shutil import copyfile
-        self.Path_preprocessing1 = self.input_dir.split("/")[0:-1]
-        self.Path_preprocessing_img = (
-            "/").join(self.Path_preprocessing1) + "/2Preprocessing_img/"
-        self.Path_preprocessing_label = (
-            "/").join(self.Path_preprocessing1) + "/2Preprocessing_label/"
-        self.Path_preprocessing_Detect = (
-            "/").join(self.Path_preprocessing1) + "/3Detection_img/"
-        self.Path_preprocessing_image = (
-            "/").join(self.Path_preprocessing1) + "/preprocess_result/"
-        self.Path_pp = self.Path_img.replace(
-            'original', 'preprocess_result').replace('_origin', 'pp_clean')
-        # Lisst_del = [f for in os.listdir(self.Path_Preprocessing)]
-        for i in os.listdir(self.Path_preprocessing_img):
-            os.remove(self.Path_preprocessing_img + i)
-        for i in os.listdir(self.Path_preprocessing_label):
-            os.remove(self.Path_preprocessing_label + i)
-        for i in os.listdir(self.Path_preprocessing_Detect):
-            os.remove(self.Path_preprocessing_Detect + i)
-        # print(self.Path_pp)
-        copyfile(self.Path_pp, self.Path_preprocessing_img +
-                 os.path.basename(self.Path_pp).replace("pp_clean", "_clean"))
-        copyfile(self.Path_pp.replace("pp_clean", "_label"), self.Path_preprocessing_img.replace(
-            '_img', '_label') + os.path.basename(self.Path_pp.replace("pp_clean", "_label")))
+        if len(self.inputDir) == 0:
+            print("Choose source folder first!")
+        else:
+            self.Path_preprocessing1 = self.inputDir.split("/")[0:-1]
+            self.Path_preprocessing_img = (
+                "/").join(self.Path_preprocessing1) + "/2Preprocessing_img/"
+            self.Path_preprocessing_label = (
+                "/").join(self.Path_preprocessing1) + "/2Preprocessing_label/"
+            self.Path_preprocessing_Detect = (
+                "/").join(self.Path_preprocessing1) + "/3Detection_img/"
+            self.Path_preprocessing_image = (
+                "/").join(self.Path_preprocessing1) + "/preprocess_result/"
+            self.path2PreImg = self.path2Image.replace(
+                'original', 'preprocess_result').replace('_origin', 'pp_clean')
+            for i in os.listdir(self.Path_preprocessing_img):
+                os.remove(self.Path_preprocessing_img + i)
+            for i in os.listdir(self.Path_preprocessing_label):
+                os.remove(self.Path_preprocessing_label + i)
+            for i in os.listdir(self.Path_preprocessing_Detect):
+                os.remove(self.Path_preprocessing_Detect + i)
+            # print(self.path2PreImg)
+            copyfile(self.path2PreImg, self.Path_preprocessing_img +
+                     os.path.basename(self.path2PreImg).replace("pp_clean", "_clean"))
+            copyfile(self.path2PreImg.replace("pp_clean", "_label"), self.Path_preprocessing_img.replace(
+                '_img', '_label') + os.path.basename(self.path2PreImg.replace("pp_clean", "_label")))
 
-        sys.path.append("../DSB2017")
-        from main import main_init
-        main_init()
-        appMainWindow.Detection_Image(self)
+            sys.path.append("../DSB2017")
+            from main import main_init
+            main_init()
+            appMainWindow.detectionImage(self)
 
-    def Detection_Image(self):
+    def detectionImage(self):
+
         Path_Detection_img = self.Path_preprocessing_img.replace(
             "2Preprocessing_img", "3Detection_img") + "/" + str(self.imageIndex.currentText()).replace("_origin", "_pbb")
         Path_Preprocessing_img = self.Path_preprocessing_img + "/" + \
@@ -151,108 +175,56 @@ class appMainWindow(Ui_Form):
         # self.detectionResultImage.setGeometry(1060, 120, 500, 400)
         self.detectionResultImage.show()
 
-    def choose_slice(self):
+    # Called when either user changes images in dataset OR slide bar moves OR user types
+    # a new slice
+    def __updateView(self):
 
-        # [Phu] valueChanged.connect(self.changeValue)
-        self.originalSlider.valueChanged.connect(self.changeValue)
-        self.Path_img = self.input_dir + "/" + str(self.imageIndex.currentText())
-        self.Path_pp = self.Path_img.replace(
-            'original', 'preprocess_result').replace('_origin', 'pp_clean')
-        [self.spacing_pre, self.img_pre] = np.load(
-            self.Path_pp, allow_pickle=True)
-        self.originalSlider.setMinimum(0)
-        self.originalSlider.setMaximum(self.img_pre.shape[1] - 1)
+        if self.inputDir == "":
+            print("Select dataset first !!")
+        else:
+            # Compute path to original image and preprocessing image
+            (self.path2Image, self.path2PreImg) = self.__update_path()
 
-        #self.input_dir = QFileDialog.getExistingDirectory(None, 'Select a folder:',  "../Image",)
+            # Load preprocessed image of size (1, 278, 236, 328)
+            [preProcImgSize, self.preProcImg] = np.load(
+                self.path2PreImg, allow_pickle=True)
 
-        self.Load_numpy_img = np.load(self.Path_img)
+            # The maximum value of slide bar is set to the max num of slices of preprocessed image
+            self.originalSlider.setMaximum(self.preProcImg.shape[1] - 1)
 
-        # self.setWindowTitle("SpinBox demo")
+            # Load original image of size (139, 512, 512)
+            self.loadNumpyImg = np.load(self.path2Image, allow_pickle=True)
 
-    def changeValue(self):
+            # scaledIndex maps the index from preprocessing -> original
+            scaledIndex = int(
+                self.slideBarVal / self.preProcImg.shape[1] * self.loadNumpyImg.shape[0])
 
-        pre_size = self.originalSlider.value()
-        self.originalIndexEdit.setText(str(pre_size))
-        # print(size)
-        # new_size = img.shape[1] spacing[0]
-        img_size = int(pre_size / self.spacing_pre[0])
+            # Original image
+            jpgFileName = self.path2Image.replace(".npy", ".jpg")
 
-        cv2.imwrite(self.Path_pp.replace('npy', 'png'),
-                    self.img_pre[0, pre_size])
-        self.im = QPixmap(self.Path_pp.replace('npy', 'png'))
-        self.preprocessingImage.setPixmap(self.im)
-        self.preprocessingImage.show()
+            # Write to file & read from file
+            cv2.imwrite(jpgFileName, self.loadNumpyImg[scaledIndex])
+            qImg = QPixmap(jpgFileName)
 
-        print(pre_size, self.spacing_pre, img_size)
+            self.originalImage.setPixmap(qImg)
+            self.originalImage.show()
 
-        """Show Original Image from Pre Number"""
+            # Preprocessing image
+            jpgFileName = self.path2PreImg.replace('npy', 'png')
 
-        print(self.Load_numpy_img.shape)
-        self.Load_numpy_img_new = np.expand_dims(self.Load_numpy_img, axis=0)
-        # cv2.imwrite(self.Path_img.replace(".npy",".jpg"),self.Load_numpy_img_new[0,img_size])
+            # Write to file & read from file
+            cv2.imwrite(jpgFileName, self.preProcImg[0, self.slideBarVal])
+            preImg = QPixmap(jpgFileName)
 
-        # plt.imshow(self.Load_numpy_img_new[0,img_size],'gray')
-        plt.imsave(self.Path_img.replace(".npy", ".jpg"),
-                   self.Load_numpy_img_new[0, img_size], cmap='gray')
-        img = QPixmap(self.Path_img.replace(".npy", ".jpg"))
-
-        self.originalImage.setPixmap(img)
-        self.originalImage.show()
-
-    # """"""
-#################################### processing ###############################
-        # self.im1 = QPixmap(joinfolder + "/Image_Pr" +  "/" + self.Path_Original )
-
-        # # self.Input_label = QLabel()
-        """
-        img = np.load('./Image/Image_Pr/001_clean.npy')
-        
-        import matplotlib.pyplot as plt
-        cv2.imwrite("./Image/Image_Pr/001_clean.jpg",img[0,25])
-        # cv2.imshow("aa",img[0,25])
-
-        # cv2.waitKey(0)
-        # print(img[0,25,12,23])
-        # img = Image.fromarray(img[0,25,5], 'RGB')
-        # # print(img.shape)
-        self.im = QPixmap('./Image/Image_Pr/001_clean.jpg' ) 
-        self.preprocessingImage.setPixmap(self.im)
-        self.preprocessingImage.setGeometry(450, 110, 411, 331) 
-        self.preprocessingImage.show()
-        # pbb = np.load('./bbox_result/000_pbb.npy')
-
-        # pbb = pbb[pbb[:,0]>-1]
-        # pbb = nms(pbb,0.05)
-        # box = pbb[0].astype('int')[1:]
-        # print(box)
-
-        
-        # ax = plt.subplot(1,1,1)
-        # plt.imshow(img[0,box[0]],'gray')
-        # plt.axis('off')
-
-
-        # ListImageOut = [h for h in os.listdir(joinfolder) if h.endswith(".jpg")]
-        # self.im2 = QPixmap(joinfolder + "/Image_Out" + "/" + self.Path_Original ) 
-        # # self.Input_label = QLabel()
-        # self.detectionResultImage.setPixmap(self.im2) 
-        # self.detectionResultImage.setGeometry(880, 110, 411, 331) 
-        # self.detectionResultImage.show()
-        """
-
-    # def ImageOut(self):
-
-    #     FolderImageOut = "./Image_Out/"
-    #     ListImageOut = [h for h in os.listdir(FolderImageOut) if h.endswith(".jpg")]
-
-    # def ShowImage(self):
-    #     lb = QtGui.QLabel(self)
+            self.preprocessingImage.setPixmap(preImg)
+            self.preprocessingImage.show()
 
 
 def Main_Function():
     ui = appMainWindow()
     qtWidget.show()
     sys.exit(app.exec_())
+
 
 if __name__ == "__main__":
     Main_Function()

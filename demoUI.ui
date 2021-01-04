@@ -30,11 +30,11 @@
   <property name="windowTitle">
    <string>Detection Nodules</string>
   </property>
-  <widget class="QComboBox" name="comboX">
+  <widget class="QComboBox" name="imageIndex">
    <property name="geometry">
     <rect>
-     <x>1020</x>
-     <y>650</y>
+     <x>1130</x>
+     <y>660</y>
      <width>151</width>
      <height>31</height>
     </rect>
@@ -42,31 +42,36 @@
    <property name="font">
     <font>
      <family>PMingLiU</family>
-     <pointsize>10</pointsize>
+     <pointsize>14</pointsize>
     </font>
    </property>
    <property name="tabletTracking">
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QPushButton" name="btnResult">
+  <widget class="QPushButton" name="detectButton">
    <property name="geometry">
     <rect>
-     <x>1380</x>
-     <y>570</y>
+     <x>1090</x>
+     <y>580</y>
      <width>161</width>
      <height>51</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>Detect</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_Input">
+  <widget class="QLabel" name="originalImage">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>120</y>
+     <y>140</y>
      <width>500</width>
      <height>400</height>
     </rect>
@@ -93,11 +98,11 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="label_Pre_Processing">
+  <widget class="QLabel" name="preprocessingImage">
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>120</y>
+     <y>140</y>
      <width>500</width>
      <height>400</height>
     </rect>
@@ -118,11 +123,11 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="label_Output">
+  <widget class="QLabel" name="detectionResultImage">
    <property name="geometry">
     <rect>
      <x>1060</x>
-     <y>120</y>
+     <y>140</y>
      <width>500</width>
      <height>400</height>
     </rect>
@@ -143,43 +148,43 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QTextBrowser" name="link_Browser">
+  <widget class="QTextBrowser" name="directoryBrowser">
    <property name="geometry">
     <rect>
-     <x>270</x>
-     <y>650</y>
+     <x>250</x>
+     <y>660</y>
      <width>731</width>
      <height>31</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
   </widget>
-  <widget class="QTextBrowser" name="result_Browser">
+  <widget class="QPushButton" name="browseButton">
    <property name="geometry">
     <rect>
-     <x>1380</x>
-     <y>630</y>
-     <width>161</width>
+     <x>80</x>
+     <y>660</y>
+     <width>141</width>
      <height>31</height>
     </rect>
    </property>
-  </widget>
-  <widget class="QPushButton" name="btnBrowser">
-   <property name="geometry">
-    <rect>
-     <x>110</x>
-     <y>650</y>
-     <width>121</width>
-     <height>31</height>
-    </rect>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
    </property>
    <property name="text">
-    <string>Browser</string>
+    <string>Browse Dataset</string>
    </property>
   </widget>
-  <widget class="QLabel" name="name_label">
+  <widget class="QLabel" name="titleLabel">
    <property name="geometry">
     <rect>
-     <x>350</x>
+     <x>340</x>
      <y>10</y>
      <width>961</width>
      <height>101</height>
@@ -200,7 +205,8 @@
    </property>
    <property name="text">
     <string>Evaluate The Malignancy Of Pulmonary Nodules 
-Using 3-D Deep Leaky Noisy-OR Network</string>
+Using 3-D Deep Leaky Noisy-OR Network 
+ </string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -212,11 +218,11 @@ Using 3-D Deep Leaky Noisy-OR Network</string>
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="Input_label">
+  <widget class="QLabel" name="originalImageLabel">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>530</y>
+     <x>220</x>
+     <y>100</y>
      <width>151</width>
      <height>31</height>
     </rect>
@@ -230,11 +236,11 @@ Using 3-D Deep Leaky Noisy-OR Network</string>
     <string>Original Image</string>
    </property>
   </widget>
-  <widget class="QLabel" name="Preprocessing_label">
+  <widget class="QLabel" name="preprocessingLabel">
    <property name="geometry">
     <rect>
-     <x>710</x>
-     <y>530</y>
+     <x>720</x>
+     <y>100</y>
      <width>191</width>
      <height>31</height>
     </rect>
@@ -248,11 +254,11 @@ Using 3-D Deep Leaky Noisy-OR Network</string>
     <string>Preprocessing Image</string>
    </property>
   </widget>
-  <widget class="QLabel" name="detectionimage">
+  <widget class="QLabel" name="detectImageLabel">
    <property name="geometry">
     <rect>
-     <x>1260</x>
-     <y>530</y>
+     <x>1130</x>
+     <y>550</y>
      <width>141</width>
      <height>31</height>
     </rect>
@@ -263,14 +269,14 @@ Using 3-D Deep Leaky Noisy-OR Network</string>
     </font>
    </property>
    <property name="text">
-    <string>Detection Image</string>
+    <string>Detect Image</string>
    </property>
   </widget>
-  <widget class="QSlider" name="Slider_original">
+  <widget class="QSlider" name="originalSlider">
    <property name="geometry">
     <rect>
-     <x>270</x>
-     <y>580</y>
+     <x>130</x>
+     <y>600</y>
      <width>731</width>
      <height>22</height>
     </rect>
@@ -279,86 +285,124 @@ Using 3-D Deep Leaky Noisy-OR Network</string>
     <enum>Qt::Horizontal</enum>
    </property>
   </widget>
-  <widget class="QPushButton" name="btnprocessing">
+  <widget class="QLabel" name="orignalSliderLabel">
    <property name="geometry">
     <rect>
-     <x>1220</x>
-     <y>570</y>
-     <width>151</width>
-     <height>51</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Preprocessing</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="Input_label_2">
-   <property name="geometry">
-    <rect>
-     <x>110</x>
-     <y>570</y>
+     <x>30</x>
+     <y>590</y>
      <width>111</width>
      <height>31</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>13</pointsize>
+     <pointsize>14</pointsize>
     </font>
    </property>
    <property name="text">
     <string>Original Slice</string>
    </property>
   </widget>
-  <widget class="QSlider" name="Slider_process">
+  <widget class="QLabel" name="chooseImageLabel">
    <property name="geometry">
     <rect>
-     <x>270</x>
-     <y>610</y>
-     <width>731</width>
-     <height>22</height>
+     <x>1020</x>
+     <y>660</y>
+     <width>141</width>
+     <height>31</height>
     </rect>
    </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Choose Image</string>
    </property>
   </widget>
-  <widget class="QLabel" name="Input_label_3">
+  <widget class="QLabel" name="detectResultLabel">
    <property name="geometry">
     <rect>
-     <x>110</x>
-     <y>600</y>
+     <x>1260</x>
+     <y>100</y>
      <width>151</width>
      <height>31</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>13</pointsize>
+     <pointsize>14</pointsize>
     </font>
    </property>
    <property name="text">
-    <string>Processing Slice</string>
+    <string>Detect Result</string>
    </property>
   </widget>
-  <widget class="QTextBrowser" name="result_slide_input">
+  <widget class="QLabel" name="Author">
    <property name="geometry">
     <rect>
-     <x>1020</x>
-     <y>570</y>
+     <x>620</x>
+     <y>80</y>
+     <width>381</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>15</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Fangzhou Liao, Ming Liang, Zhe Li, Xiaolin Hu, Sen Song</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="detectResultLabel_2">
+   <property name="geometry">
+    <rect>
+     <x>1370</x>
+     <y>550</y>
      <width>151</width>
      <height>31</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Detect Result</string>
+   </property>
   </widget>
-  <widget class="QTextBrowser" name="result_slide_process">
+  <widget class="QLineEdit" name="originalIndexEdit">
    <property name="geometry">
     <rect>
-     <x>1020</x>
-     <y>610</y>
-     <width>151</width>
+     <x>870</x>
+     <y>590</y>
+     <width>201</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="detectionResultEdit">
+   <property name="geometry">
+    <rect>
+     <x>1270</x>
+     <y>590</y>
+     <width>291</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
    </property>
   </widget>
  </widget>

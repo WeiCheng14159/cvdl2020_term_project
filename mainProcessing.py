@@ -28,18 +28,18 @@ class appMainWindow(Ui_Form):
     def __init__(self):
         super(appMainWindow, self).__init__()
         self.setupUi(qtWidget)
-        self.btnprocessing.clicked.connect(QCoreApplication.instance().quit)
-        self.btnResult.clicked.connect(self.Detection_Training)
-        self.btnBrowser.clicked.connect(self.Browser_directory)
-        self.comboX.currentIndexChanged.connect(self.onCurrentIndexChanged)
-        self.Slider_process.valueChanged.connect(self.choose_slice)
+        # self.preprocessButton.clicked.connect(QCoreApplication.instance().quit)
+        self.detectButton.clicked.connect(self.Detection_Training)
+        self.browseButton.clicked.connect(self.Browser_directory)
+        self.imageIndex.currentIndexChanged.connect(self.onCurrentIndexChanged)
+        self.originalSlider.valueChanged.connect(self.choose_slice)
 
     def Browser_directory(self):
         print("------Open Browser-------")
         dialog_style = QFileDialog.DontUseNativeDialog
         dialog_style |= QFileDialog.DontUseCustomDirectoryIcons
         self.input_dir = QFileDialog.getExistingDirectory(None, 'Select a folder:',  "../Image",)
-        self.link_Browser.setText(self.input_dir)
+        self.directoryBrowser.setText(self.input_dir)
         
         self.Path_Image = ("/").join(self.input_dir.split("/")[0:-1])
         self.List_Path_Image = [f for f in os.listdir(self.Path_Image)]
@@ -47,23 +47,23 @@ class appMainWindow(Ui_Form):
         self.List_Image = [f for f in os.listdir(self.input_dir) if f.endswith('.npy')]
         self.List_Image.sort(reverse=True)
         
-        self.comboX.addItems(self.List_Image)
-        self.Path_Original = self.input_dir + "/" + str(self.comboX.currentText())
+        self.imageIndex.addItems(self.List_Image)
+        self.Path_Original = self.input_dir + "/" + str(self.imageIndex.currentText())
         self.Path_Preprocessing = self.Path_Image + "/" + self.List_Path_Image[1]
         self.Path_Detection = self.Path_Image + "/" + self.List_Path_Image[0]
         print(self.List_Path_Image)
 
     def onCurrentIndexChanged(self, indeximg):
-        self.Path_img = self.input_dir + "/" + str(self.comboX.currentText())
+        self.Path_img = self.input_dir + "/" + str(self.imageIndex.currentText())
 
         self.Load_numpy_img = np.load(self.Path_img, allow_pickle=True)
 
         cv2.imwrite(self.Path_img.replace(".npy", ".jpg"),
                     self.Load_numpy_img[0, 0])
         img = QPixmap(self.Path_img.replace(".npy", ".jpg"))
-        self.Slider_process.setValue(0)
-        self.label_Input.setPixmap(img)
-        self.label_Input.show()
+        self.originalSlider.setValue(0)
+        self.originalImage.setPixmap(img)
+        self.originalImage.show()
 
 
 ##############################################################################
@@ -77,7 +77,7 @@ class appMainWindow(Ui_Form):
         """"""
 
         Path_Preprocessing_img = self.Path_Preprocessing + \
-            "/" + str(self.comboX.currentText())
+            "/" + str(self.imageIndex.currentText())
         # print(self.Path_Preprocessing)
         self.Load_numpy_img = np.load(Path_Preprocessing_img)
 
@@ -85,9 +85,9 @@ class appMainWindow(Ui_Form):
             ".npy", ".jpg"), self.Load_numpy_img[0, 0])
         img = QPixmap(Path_Preprocessing_img.replace(".npy", ".jpg"))
 
-        self.label_Pre_Processing.setPixmap(img)
-        # self.label_Pre_Processing.setGeometry(540, 120, 500, 400)
-        self.label_Pre_Processing.show()
+        self.preprocessingImage.setPixmap(img)
+        # self.preprocessingImage.setGeometry(540, 120, 500, 400)
+        self.preprocessingImage.show()
 
     def Detection_Training(self):
         from shutil import copyfile
@@ -122,9 +122,9 @@ class appMainWindow(Ui_Form):
 
     def Detection_Image(self):
         Path_Detection_img = self.Path_preprocessing_img.replace(
-            "2Preprocessing_img", "3Detection_img") + "/" + str(self.comboX.currentText()).replace("_origin", "_pbb")
+            "2Preprocessing_img", "3Detection_img") + "/" + str(self.imageIndex.currentText()).replace("_origin", "_pbb")
         Path_Preprocessing_img = self.Path_preprocessing_img + "/" + \
-            str(self.comboX.currentText()).replace("_origin", "_clean")
+            str(self.imageIndex.currentText()).replace("_origin", "_clean")
         [a, img] = np.load(Path_Preprocessing_img, allow_pickle=True)
 
         pbb = np.load(Path_Detection_img)
@@ -135,7 +135,7 @@ class appMainWindow(Ui_Form):
         print(box)
         text = "Slice: %s  Height: %s  Width: %s  Chanels: %s" % (
             box[0], box[1], box[2], box[3])
-        self.result_Browser.setText(text)
+        self.detectionResultEdit.setText(text)
         ax = plt.subplot(1, 1, 1)
         ax.axis('off')
         plt.imshow(img[0, box[0]], 'gray')
@@ -147,21 +147,21 @@ class appMainWindow(Ui_Form):
         ax.figure.savefig(Path_Detection_img.replace(".npy", ".jpg"))
         plt.cla()
         img = QPixmap(Path_Detection_img.replace(".npy", ".jpg"))
-        self.label_Output.setPixmap(img)
-        # self.label_Output.setGeometry(1060, 120, 500, 400)
-        self.label_Output.show()
+        self.detectionResultImage.setPixmap(img)
+        # self.detectionResultImage.setGeometry(1060, 120, 500, 400)
+        self.detectionResultImage.show()
 
     def choose_slice(self):
 
         # [Phu] valueChanged.connect(self.changeValue)
-        self.Slider_process.valueChanged.connect(self.changeValue)
-        self.Path_img = self.input_dir + "/" + str(self.comboX.currentText())
+        self.originalSlider.valueChanged.connect(self.changeValue)
+        self.Path_img = self.input_dir + "/" + str(self.imageIndex.currentText())
         self.Path_pp = self.Path_img.replace(
             'original', 'preprocess_result').replace('_origin', 'pp_clean')
         [self.spacing_pre, self.img_pre] = np.load(
             self.Path_pp, allow_pickle=True)
-        self.Slider_process.setMinimum(0)
-        self.Slider_process.setMaximum(self.img_pre.shape[1] - 1)
+        self.originalSlider.setMinimum(0)
+        self.originalSlider.setMaximum(self.img_pre.shape[1] - 1)
 
         #self.input_dir = QFileDialog.getExistingDirectory(None, 'Select a folder:',  "../Image",)
 
@@ -171,8 +171,8 @@ class appMainWindow(Ui_Form):
 
     def changeValue(self):
 
-        pre_size = self.Slider_process.value()
-        self.result_slide_process.setText(str(pre_size))
+        pre_size = self.originalSlider.value()
+        self.originalIndexEdit.setText(str(pre_size))
         # print(size)
         # new_size = img.shape[1] spacing[0]
         img_size = int(pre_size / self.spacing_pre[0])
@@ -180,8 +180,8 @@ class appMainWindow(Ui_Form):
         cv2.imwrite(self.Path_pp.replace('npy', 'png'),
                     self.img_pre[0, pre_size])
         self.im = QPixmap(self.Path_pp.replace('npy', 'png'))
-        self.label_Pre_Processing.setPixmap(self.im)
-        self.label_Pre_Processing.show()
+        self.preprocessingImage.setPixmap(self.im)
+        self.preprocessingImage.show()
 
         print(pre_size, self.spacing_pre, img_size)
 
@@ -196,8 +196,8 @@ class appMainWindow(Ui_Form):
                    self.Load_numpy_img_new[0, img_size], cmap='gray')
         img = QPixmap(self.Path_img.replace(".npy", ".jpg"))
 
-        self.label_Input.setPixmap(img)
-        self.label_Input.show()
+        self.originalImage.setPixmap(img)
+        self.originalImage.show()
 
     # """"""
 #################################### processing ###############################
@@ -216,9 +216,9 @@ class appMainWindow(Ui_Form):
         # img = Image.fromarray(img[0,25,5], 'RGB')
         # # print(img.shape)
         self.im = QPixmap('./Image/Image_Pr/001_clean.jpg' ) 
-        self.label_Pre_Processing.setPixmap(self.im)
-        self.label_Pre_Processing.setGeometry(450, 110, 411, 331) 
-        self.label_Pre_Processing.show()
+        self.preprocessingImage.setPixmap(self.im)
+        self.preprocessingImage.setGeometry(450, 110, 411, 331) 
+        self.preprocessingImage.show()
         # pbb = np.load('./bbox_result/000_pbb.npy')
 
         # pbb = pbb[pbb[:,0]>-1]
@@ -235,9 +235,9 @@ class appMainWindow(Ui_Form):
         # ListImageOut = [h for h in os.listdir(joinfolder) if h.endswith(".jpg")]
         # self.im2 = QPixmap(joinfolder + "/Image_Out" + "/" + self.Path_Original ) 
         # # self.Input_label = QLabel()
-        # self.label_Output.setPixmap(self.im2) 
-        # self.label_Output.setGeometry(880, 110, 411, 331) 
-        # self.label_Output.show()
+        # self.detectionResultImage.setPixmap(self.im2) 
+        # self.detectionResultImage.setGeometry(880, 110, 411, 331) 
+        # self.detectionResultImage.show()
         """
 
     # def ImageOut(self):

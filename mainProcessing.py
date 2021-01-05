@@ -90,6 +90,9 @@ class appMainWindow(Ui_Form):
         except:
             print("Invalid index: ", text)
 
+        # Update slide bar value
+        self.originalSlider.setValue(self.slideBarVal)
+
     def __datasetIndexChanged(self, indeximg):
 
         # Update image path

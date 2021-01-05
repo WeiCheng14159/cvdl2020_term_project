@@ -98,9 +98,6 @@ class appMainWindow(Ui_Form):
 
     def __datasetIndexChanged(self, indeximg):
 
-        # Update image path
-        self.__update_path()
-
         # Reset to num 0 slice
         self.originalSlider.setValue(0)
 

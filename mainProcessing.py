@@ -78,10 +78,13 @@ class appMainWindow(Ui_Form):
 
     def __update_path(self):
 
-        path2Img = self.inputDir + "/" + str(self.imageIndex.currentText())
-        path2preImg = path2Img.replace('original', 'preprocess_result').replace(
-            '_origin', 'pp_clean')
-        return (path2Img, path2preImg)
+        if self.imageIndex.currentText() == "":
+            return (None, None)
+        else:
+            path2Img = self.inputDir + "/" + str(self.imageIndex.currentText())
+            path2preImg = path2Img.replace('original', 'preprocess_result').replace(
+                '_origin', 'pp_clean')
+            return (path2Img, path2preImg)
 
     def __sliceChange(self, text):
 
@@ -179,12 +182,10 @@ class appMainWindow(Ui_Form):
     # a new slice
     def __updateView(self):
 
-        if self.inputDir == "":
-            print("Select dataset first !!")
-        else:
-            # Compute path to original image and preprocessing image
-            (self.path2Image, self.path2PreImg) = self.__update_path()
+        # Compute path to original image and preprocessing image
+        (self.path2Image, self.path2PreImg) = self.__update_path()
 
+        if (self.path2Image is not None) and (self.path2PreImg is not None):
             # Load preprocessed image of size (1, 278, 236, 328)
             [preProcImgSize, self.preProcImg] = np.load(
                 self.path2PreImg, allow_pickle=True)

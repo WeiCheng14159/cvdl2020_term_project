@@ -64,7 +64,7 @@ class appMainWindow(Ui_Form):
         self.directoryBrowser.setText(self.inputDir)
 
         if self.inputDir == '':
-            print("not select file yet")
+            print("Select a dataset folder")
         else:
 
             # Get list of images (in *.npy form)

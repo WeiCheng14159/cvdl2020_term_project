@@ -197,6 +197,13 @@ class appMainWindow(Ui_Form):
             scaledIndex = int(
                 self.slideBarVal / self.preProcImg.shape[1] * self.loadNumpyImg.shape[0])
 
+            # Boundary checking in case out-of-bound
+            if scaledIndex >= self.loadNumpyImg.shape[0]:
+                scaledIndex = self.loadNumpyImg.shape[0] - 1
+
+            if self.slideBarVal >= self.preProcImg.shape[1]:
+                self.slideBarVal = self.preProcImg.shape[1] - 1
+
             # Original image
             jpgFileName = self.path2Image.replace(".npy", ".jpg")
 

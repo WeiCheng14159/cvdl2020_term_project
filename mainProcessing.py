@@ -66,9 +66,6 @@ class appMainWindow(Ui_Form):
         if self.inputDir == '':
             print("not select file yet")
         else:
-            # Set dataset directory
-            self.datasetPath = ("/").join(self.inputDir.split("/")[0:-1])
-            self.listDatasetPath = [f for f in os.listdir(self.datasetPath)]
 
             # Get list of images (in *.npy form)
             self.listOfImages = [f for f in os.listdir(
